@@ -2,81 +2,85 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
-import utils
+import utils as ut
+import sklearn as sk
+
+print('Numpy verstion: ', np.__version__)
+print('Pandas verstion: ', pd.__version__)
+print('Sklearn verstion: ', sk.__version__)
 
 # client = OpenAI(
 #   base_url="https://api.groq.com/openaiv1",
 #   api_key = os.environ.get("OPENAI_API_KEY")
 # )
 
-print('version: ', np.__version__)
 
 def load_model(filename):
   with open(filename, 'rb') as file:
     return pickle.load(file)
 
 xgboost_model = load_model('XGBClassifier.pkl')
-# naive_bayes_model = load_model('GaussianNB.pkl')
-# random_forest_model = load_model('RandomForestClassifier.pkl')
-# decision_tree_model = load_model('DecisionTreeClassifier.pkl')
-# svm_model = load_model( 'SVC.pkl')
-# knn_model = load_model('KNeighborsClassifier.pkl')
-# voting_classifier_model = load_model('XGBClassifier-voting.pkl')
-# xgboost_SMOTE_model = load_model('XGBClassifier-SMOTE.pkl')
-# xgboost_featureEngineered_model = load_model('XGBClassifier_featureEngineer.pkl')
+naive_bayes_model = load_model('GaussianNB.pkl')
+random_forest_model = load_model('RandomForestClassifier.pkl')
+decision_tree_model = load_model('DecisionTreeClassifier.pkl')
+svm_model = load_model( 'SVC.pkl')
+knn_model = load_model('KNeighborsClassifier.pkl')
+voting_classifier_model = load_model('XGBClassifier-voting.pkl')
+xgboost_SMOTE_model = load_model('XGBClassifier-SMOTE.pkl')
+xgboost_featureEngineered_model = load_model('XGBClassifier-featureEngineer.pkl')
 
-# def prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary):
-#   input_dict = {
-#     'CreditScore': credit_score,
-#     'Geography_France': 1 if location == 'France' else 0,
-#     'Geography_Germany': 1 if location == 'Germany' else 0,
-#     'Geography_Spain': 1 if location == 'Spain' else 0,
-#     'Gender_Male': 1 if gender == 'Male' else 0,
-#     'Gender_Female': 1 if gender == 'Female' else 0,
-#     'Age': age,
-#     'Tenure': tenure,
-#     'Balance': balance,
-#     'NumOfProducts': num_products,
-#     'HasCrCard': has_credit_card,
-#     'IsActiveMember': is_active_member,
-#     'EstimatedSalary': estimated_salary
-#   }
+def prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary):
+  input_dict = {
+    'CreditScore': credit_score,
+    'Geography_France': 1 if location == 'France' else 0,
+    'Geography_Germany': 1 if location == 'Germany' else 0,
+    'Geography_Spain': 1 if location == 'Spain' else 0,
+    'Gender_Male': 1 if gender == 'Male' else 0,
+    'Gender_Female': 1 if gender == 'Female' else 0,
+    'Age': age,
+    'Tenure': tenure,
+    'Balance': balance,
+    'NumOfProducts': num_products,
+    'HasCrCard': has_credit_card,
+    'IsActiveMember': is_active_member,
+    'EstimatedSalary': estimated_salary
+  }
 
-#   input_df = pd.DataFrame([input_dict])
-#   return input_df, input_dict
+  input_df = pd.DataFrame([input_dict])
+  return input_df, input_dict
 
-# def make_predictions(input_df, input_dict):
-#   probabilities = {
-#     'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
-#     'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
-#     'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
-#     'Decision Tree' : decision_tree_model.predict_proba(input_df)[0][1],
-#     'SVM': svm_model.predict_proba(input_df)[0][1],
-#     'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-#     'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
-#     'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_df)[0][1],
-#     'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
-#   }
+def make_predictions(input_df, input_dict):
+  probabilities = {
+    'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
+    'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
+    'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
+    'Decision Tree' : decision_tree_model.predict_proba(input_df)[0][1],
+    'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
+    'SVM': svm_model.predict_proba(input_df),
+    # 'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
+    # 'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_df)[0][1],
+    # 'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
+  }
   
-#   avg_probability = np.mean(list(probabilities.values()))
+  avg_probability = np.mean(list(probabilities.values()))
 
-#   col1, col2 = st.columns(2)
+  col1, col2 = st.columns(2)
 
-#   with col1:
-#     fig = ut.create_gauge_chart(avg_probability)
-#     st.plotly_chart(fig, use_container_width=True)
-#     st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
+  with col1:
+    fig = ut.create_gauge_chart(avg_probability)
+    st.plotly_chart(fig, use_container_width=True)
+    st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
 
-#   with col2:
-#     fig_probs = ut.create_model_probability_chart(probabilities)
-#     st.plotly_chart(fig_probs, use_container_width=True)
+  with col2:
+    fig_probs = ut.create_model_probability_chart(probabilities)
+    st.plotly_chart(fig_probs, use_container_width=True)
 
-#   st.markdown("### Model Probabilities")
-#   for model, prob in probabilities.items():
-#     st.write(f"{model}: {prob:.2f}")
-#     st.write(f"Average Probability: {avg_probability:.2f}")
+  st.markdown("### Model Probabilities")
+  for model, prob in probabilities.items():
+    st.write(f"{model}: {prob:.2f}")
+    st.write(f"Average Probability: {avg_probability:.2f}")
 
-#   return avg_probability
+  return avg_probability
 
 # def explain_prediction(probability, input_dict, surname):
 #   systemPrompt = f"""
@@ -267,9 +271,12 @@ if selected_customer_option:
 
     
 
-  # input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
-    
+  input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
+  print(input_df, input_dict)
+
   # avg_probability = make_predictions(input_df, input_dict)
+  # print(avg_probability)
+
   # explanation = explain_prediction(avg_probability, input_dict, customer_surname)
   # st.markdown('---')
   # st.subheader('Explanation of Prediction')

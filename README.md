@@ -18,3 +18,29 @@ Skills: Python, OpenAI, Machine Learning, Model Inference, Feature Engineering, 
     * Creating the UI and charts
     * Making predictions with the ML models
     * Generating personalized emails with OpenAI or LLama 3.1 via Groq
+
+
+    Troubleshooting:
+    * Update on storing serialized model and memory snapshots using Pickle
+    Use `save_model` instead of `pickle.dump` to save the model
+    https://xgboost.readthedocs.io/en/stable/tutorials/saving_model.html
+
+## Create Python virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+## Running streamlit
+```bash
+cd streamlit/
+streamlit run main.py
+```
+
+Troubleshooting:
+* ERROR: The error was related to XGBoost failing to load due to the missing OpenMP runtime library (libomp.dylib) on macOS
+
+SOLUTION: Update ```libomp```
+```bash
+brew install libomp
+```
