@@ -21,17 +21,22 @@ def load_model(filename):
     return pickle.load(file)
 
 # Trained models
-xgboost_model = load_model('XGBClassifier.pkl')
-naive_bayes_model = load_model('GaussianNB.pkl')
-random_forest_model = load_model('RandomForestClassifier.pkl')
-decision_tree_model = load_model('DecisionTreeClassifier.pkl')
-svm_model = load_model( 'SVC.pkl')
-knn_model = load_model('KNeighborsClassifier.pkl')
+# xgboost_model = load_model('XGBClassifier.pkl')
+# naive_bayes_model = load_model('GaussianNB.pkl')
+# random_forest_model = load_model('RandomForestClassifier.pkl')
+# decision_tree_model = load_model('DecisionTreeClassifier.pkl')
+# svm_model = load_model( 'SVC.pkl')
+# knn_model = load_model('KNeighborsClassifier.pkl')
 
 # Train models with feature engineering
 voting_classifier_model = load_model('VotingClassifier-voting.pkl')
 xgboost_SMOTE_model = load_model('XGBClassifier-SMOTE.pkl')
 xgboost_featureEngineered_model = load_model('XGBClassifier-featureEngineer.pkl')
+naive_bayes_model = load_model('GaussianNB-engineered.pkl')
+random_forest_model = load_model('RandomForestClassifier-engineered.pkl')
+decision_tree_model = load_model('DecisionTreeClassifier-engineered.pkl')
+svm_model = load_model( 'SVC-engineered.pkl')
+knn_model = load_model('KNeighborsClassifier-engineered.pkl')
 
 def prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary):
   input_dict = {
@@ -47,17 +52,15 @@ def prepare_input(credit_score, location, gender, age, tenure, balance, num_prod
     'NumOfProducts': num_products,
     'HasCrCard': has_credit_card,
     'IsActiveMember': is_active_member,
-    'EstimatedSalary': estimated_salary
+    'EstimatedSalary': estimated_salary,
+
+    # Additional features
+    'TenureAgeRatio' : tenure / age if age > 0 else 0,
+    'CLV' : (balance + estimated_salary) / (age + 1),
+    'AgeGroup_MiddleAge' : 1 if 30 <= age < 44 else 0,
+    'AgeGroup_Senior' : 1 if 45 <= age < 59 else 0,
+    'AgeGroup_Elderly' : 1 if age >= 45 else 0,
   }
-
-  # Features Engineering
-  input_dict['TenureAgeRatio'] = tenure / age if age > 0 else 0
-  input_dict['CLV'] = (balance + estimated_salary) / (age + 1)  # Simplified CLV calculation
-
-  # Age groups
-  input_dict['AgeGroup_MiddleAge'] = 1 if 30 <= age < 44 else 0
-  input_dict['AgeGroup_Senior'] = 1 if 45 <= age < 59 else 0
-  input_dict['AgeGroup_Elderly'] = 1 if age >= 45 else 0
 
   input_df = pd.DataFrame([input_dict])
   return input_df, input_dict
@@ -74,7 +77,6 @@ def make_predictions(input_df, input_dict):
   input_df = input_df[expected_order]
 
   # Make predictions
-  xgb_predict = xgboost_model.predict_proba(input_df)[0][1],
   nb_predict = naive_bayes_model.predict_proba(input_df)[0][1],
   rf_predict = random_forest_model.predict_proba(input_df)[0][1],
   dt_predict = decision_tree_model.predict_proba(input_df)[0][1],
@@ -84,7 +86,6 @@ def make_predictions(input_df, input_dict):
   xgb_smote_predict = xgboost_SMOTE_model.predict_proba(input_df)[0][1],
   xgb_featureEngineered = xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
 
-  xgb_predict = xgb_predict[0]
   nb_predict = nb_predict[0]
   rf_predict = rf_predict[0]
   dt_predict = dt_predict[0]
@@ -98,7 +99,6 @@ def make_predictions(input_df, input_dict):
 
   # Filter out predictions that are very close to zero
   min_threshold = 0.0001
-  if xgb_predict >= min_threshold: probabilities['XGBoost'] = xgb_predict
   if nb_predict >= min_threshold: probabilities['Naive Bayes'] = nb_predict
   if rf_predict >= min_threshold: probabilities['Random Forest'] = rf_predict
   if dt_predict >= min_threshold: probabilities['Decision Tree'] = dt_predict
