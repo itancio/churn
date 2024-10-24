@@ -6,24 +6,14 @@ import pickle
 import utils as ut
 import sklearn as sk
 
-from dotenv import load_dotenv
 from openai import OpenAI
+
+client = OpenAI()
 
 # For debugging purposes
 print('Numpy verstion: ', np.__version__)
 print('Pandas verstion: ', pd.__version__)
 print('Sklearn verstion: ', sk.__version__)
-
-load_dotenv()
-openai_key = os.getenv("OPENAI_API_KEY")
-if not openai_key:
-  st.error("Please set the OPENAI_API_KEY environment variable.")
-  exit(1)
-
-client = OpenAI(
-  base_url="https://api.groq.com/openai/v1",
-  api_key = openai_key
-)
 
 
 def load_model(filename):
@@ -83,18 +73,43 @@ def make_predictions(input_df, input_dict):
   # Reorder the input DataFrame
   input_df = input_df[expected_order]
 
-  probabilities = {
-    'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
-    'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
-    'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
-    'Decision Tree' : decision_tree_model.predict_proba(input_df)[0][1],
-    'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-    'SVM': svm_model.predict_proba(input_df)[0][1],
-    'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
-    'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_df)[0][1],
-    'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
-  }
+  # Make predictions
+  xgb_predict = xgboost_model.predict_proba(input_df)[0][1],
+  nb_predict = naive_bayes_model.predict_proba(input_df)[0][1],
+  rf_predict = random_forest_model.predict_proba(input_df)[0][1],
+  dt_predict = decision_tree_model.predict_proba(input_df)[0][1],
+  knn_predict = knn_model.predict_proba(input_df)[0][1],
+  svm_predict = svm_model.predict_proba(input_df)[0][1],
+  vc_predict = voting_classifier_model.predict_proba(input_df)[0][1],
+  xgb_smote_predict = xgboost_SMOTE_model.predict_proba(input_df)[0][1],
+  xgb_featureEngineered = xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
+
+  xgb_predict = xgb_predict[0]
+  nb_predict = nb_predict[0]
+  rf_predict = rf_predict[0]
+  dt_predict = dt_predict[0]
+  knn_predict = knn_predict[0]
+  svm_predict = svm_predict[0]
+  vc_predict = vc_predict[0]
+  xgb_smote_predict = xgb_smote_predict[0]
+  xgb_featureEngineered = xgb_featureEngineered
+
+  probabilities = {}
+
+  # Filter out predictions that are very close to zero
+  min_threshold = 0.0001
+  if xgb_predict >= min_threshold: probabilities['XGBoost'] = xgb_predict
+  if nb_predict >= min_threshold: probabilities['Naive Bayes'] = nb_predict
+  if rf_predict >= min_threshold: probabilities['Random Forest'] = rf_predict
+  if dt_predict >= min_threshold: probabilities['Decision Tree'] = dt_predict
+  if knn_predict >= min_threshold: probabilities['K-Nearest Neighbors'] = knn_predict
+  if svm_predict >= min_threshold: probabilities['SVM'] = svm_predict
+  if vc_predict >= min_threshold: probabilities['Voting Classifier'] = vc_predict
+  if xgb_smote_predict >= min_threshold: probabilities['XGBoost SMOTE'] = xgb_smote_predict
+  if xgb_featureEngineered >= min_threshold: probabilities['XGBoost Feature Engineered'] = xgb_featureEngineered
   
+  print(probabilities)
+
   # Calculate the average probability
   avg_probability = np.mean(list(probabilities.values()))
   print('avg_probability: ', avg_probability)
@@ -173,7 +188,7 @@ def explain_prediction(probability, input_dict, surname):
   print("EXPLANATION PROMPT", systemPrompt)
 
   raw_response = client.chat.completions.create(
-    model='gpt-4o mini',
+    model='gpt-4o-mini',
     messages=[{
       'role': 'user',
       'content': systemPrompt
@@ -204,7 +219,7 @@ def generate_email(probability, input_dict, explanation, surname):
   """
 
   raw_response = client.chat.completions. create(
-    model='gpt-4o mini',
+    model='gpt-4o-mini',
     messages=[{
       'role': 'user',
       'content': systemPrompt
@@ -315,11 +330,12 @@ if selected_customer_option:
   avg_probability = make_predictions(input_df, input_dict)
   print(avg_probability)
 
-  # explanation = explain_prediction(avg_probability, input_dict, customer_surname)
-  # st.markdown('---')
-  # st.subheader('Explanation of Prediction')
-  # st.markdown(explanation)
-  # email = generate_email(avg_probability, input_dict, explanation, customer_surname)
-  # st.markdown('---')
-  # st.subheader('Personalized Email')
-  # st.markdown(email)
+  st.markdown('---')
+  st.subheader('Explanation of Prediction')
+  explanation = explain_prediction(avg_probability, input_dict, customer_surname)
+  st.markdown(explanation)
+
+  st.markdown('---')
+  st.subheader('Personalized Email')
+  email = generate_email(avg_probability, input_dict, explanation, customer_surname)
+  st.markdown(email)
