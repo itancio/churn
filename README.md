@@ -26,8 +26,8 @@ Skills: Python, OpenAI, Machine Learning, Model Inference, Feature Engineering, 
     https://xgboost.readthedocs.io/en/stable/tutorials/saving_model.html
 
 
-[website1.png]('public/assets/website1.png')
-[website2.png]('public/assets/website2.png')
+![website1](public/assets/website1.png)
+![website2](public/assets/website2.png)
 
 
 
