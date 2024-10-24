@@ -49,10 +49,30 @@ def prepare_input(credit_score, location, gender, age, tenure, balance, num_prod
     'EstimatedSalary': estimated_salary
   }
 
+  # Features Engineering
+  input_dict['TenureAgeRatio'] = tenure / age if age > 0 else 0
+  input_dict['CLV'] = (balance + estimated_salary) / (age + 1)  # Simplified CLV calculation
+
+  # Age groups
+  input_dict['AgeGroup_MiddleAge'] = 1 if 30 <= age < 44 else 0
+  input_dict['AgeGroup_Senior'] = 1 if 45 <= age < 59 else 0
+  input_dict['AgeGroup_Elderly'] = 1 if age >= 45 else 0
+
   input_df = pd.DataFrame([input_dict])
   return input_df, input_dict
 
 def make_predictions(input_df, input_dict):
+  # Define the expected order of features for XGBoost
+  expected_order = [
+      'CreditScore', 'Geography_France', 'Geography_Germany', 'Geography_Spain',
+      'Gender_Male', 'Gender_Female', 'Age', 'Tenure', 'Balance', 'NumOfProducts',
+      'HasCrCard', 'IsActiveMember', 'EstimatedSalary', 'TenureAgeRatio', 'CLV',
+      'AgeGroup_MiddleAge', 'AgeGroup_Senior', 'AgeGroup_Elderly'
+  ]
+  
+  # Reorder the input DataFrame
+  input_df = input_df[expected_order]
+
   probabilities = {
     'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
     'Naive Bayes': naive_bayes_model.predict_proba(input_df)[0][1],
@@ -65,7 +85,9 @@ def make_predictions(input_df, input_dict):
     # 'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
   }
   
+  # Calculate the average probability
   avg_probability = np.mean(list(probabilities.values()))
+  print('avg_probability: ', avg_probability)
 
   col1, col2 = st.columns(2)
 
