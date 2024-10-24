@@ -25,6 +25,13 @@ Skills: Python, OpenAI, Machine Learning, Model Inference, Feature Engineering, 
     Use `save_model` instead of `pickle.dump` to save the model
     https://xgboost.readthedocs.io/en/stable/tutorials/saving_model.html
 
+
+[website1.png]('public/assets/website1.png')
+[website2.png]('public/assets/website2.png')
+
+
+
+# Developer's Notes
 ## Create Python virtual environment
 ```bash
 python3 -m venv venv
