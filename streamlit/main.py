@@ -19,13 +19,16 @@ def load_model(filename):
   with open(filename, 'rb') as file:
     return pickle.load(file)
 
+# Trained models
 xgboost_model = load_model('XGBClassifier.pkl')
 naive_bayes_model = load_model('GaussianNB.pkl')
 random_forest_model = load_model('RandomForestClassifier.pkl')
 decision_tree_model = load_model('DecisionTreeClassifier.pkl')
 svm_model = load_model( 'SVC.pkl')
 knn_model = load_model('KNeighborsClassifier.pkl')
-voting_classifier_model = load_model('XGBClassifier-voting.pkl')
+
+# Train models with feature engineering
+voting_classifier_model = load_model('VotingClassifier-voting.pkl')
 xgboost_SMOTE_model = load_model('XGBClassifier-SMOTE.pkl')
 xgboost_featureEngineered_model = load_model('XGBClassifier-featureEngineer.pkl')
 
@@ -56,7 +59,7 @@ def make_predictions(input_df, input_dict):
     'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
     'Decision Tree' : decision_tree_model.predict_proba(input_df)[0][1],
     'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-    'SVM': svm_model.predict_proba(input_df),
+    # 'SVM': svm_model.predict_proba(input_df),
     # 'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
     # 'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_df)[0][1],
     # 'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
@@ -272,7 +275,7 @@ if selected_customer_option:
     
 
   input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
-  print(input_df, input_dict)
+  print(input_df)
 
   avg_probability = make_predictions(input_df, input_dict)
   print(avg_probability)
