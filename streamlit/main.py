@@ -78,7 +78,7 @@ def make_predictions(input_df, input_dict):
     'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
     'Decision Tree' : decision_tree_model.predict_proba(input_df)[0][1],
     'K-Nearest Neighbors': knn_model.predict_proba(input_df)[0][1],
-    # 'SVM': svm_model.predict_proba(input_df),
+    'SVM': svm_model.predict_proba(input_df)[0][1],
     # 'Voting Classifier': voting_classifier_model.predict_proba(input_df)[0][1],
     # 'XGBoost SMOTE': xgboost_SMOTE_model.predict_proba(input_df)[0][1],
     # 'XGBoost Feature Engineered': xgboost_featureEngineered_model.predict_proba(input_df)[0][1]
