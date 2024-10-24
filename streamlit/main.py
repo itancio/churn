@@ -64,11 +64,10 @@ def prepare_input(credit_score, location, gender, age, tenure, balance, num_prod
 def make_predictions(input_df, input_dict):
   # Define the expected order of features for XGBoost
   expected_order = [
-      'CreditScore', 'Geography_France', 'Geography_Germany', 'Geography_Spain',
-      'Gender_Male', 'Gender_Female', 'Age', 'Tenure', 'Balance', 'NumOfProducts',
-      'HasCrCard', 'IsActiveMember', 'EstimatedSalary', 'TenureAgeRatio', 'CLV',
-      'AgeGroup_MiddleAge', 'AgeGroup_Senior', 'AgeGroup_Elderly'
-  ]
+    'CreditScore', 'Age', 'Tenure', 'Balance', 'NumOfProducts', 'HasCrCard', 
+    'IsActiveMember', 'EstimatedSalary', 'Geography_France', 'Geography_Germany', 'Geography_Spain', 
+    'Gender_Female', 'Gender_Male', 'CLV', 'TenureAgeRatio', 'AgeGroup_MiddleAge', 
+    'AgeGroup_Senior', 'AgeGroup_Elderly'] 
   
   # Reorder the input DataFrame
   input_df = input_df[expected_order]
