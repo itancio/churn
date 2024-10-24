@@ -274,8 +274,8 @@ if selected_customer_option:
   input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
   print(input_df, input_dict)
 
-  # avg_probability = make_predictions(input_df, input_dict)
-  # print(avg_probability)
+  avg_probability = make_predictions(input_df, input_dict)
+  print(avg_probability)
 
   # explanation = explain_prediction(avg_probability, input_dict, customer_surname)
   # st.markdown('---')
