@@ -53,3 +53,15 @@ SOLUTION: Update ```libomp```
 ```bash
 brew install libomp
 ```
+
+* ERROR: Handling large files
+```bash
+git lfs install
+git lfs track "*.csv"
+git add .gitattributes
+
+git add notebook/fraud/fraudTest.csv
+git add notebook/fraud/fraudTrain.csv
+git commit -m "Add files"
+git push
+```
