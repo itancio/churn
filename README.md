@@ -63,5 +63,5 @@ git add .gitattributes
 git add notebook/fraud/fraudTest.csv
 git add notebook/fraud/fraudTrain.csv
 git commit -m "Add files"
-git push
+git push origin HEAD:fraud
 ```
