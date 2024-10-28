@@ -380,8 +380,15 @@ with tab2:
   }])
   df = sample
 
+  states = list(df['state'].unique())
+  jobs = list(df['job'].unique())
+  merchants = list(merch.split('fraud_')[1] for merch in df['merchant'].unique())
+  categories = list(df['category'].unique())
+  print('merchants: ', merchants)
+
   # transactions = [f"{row['trans_num']} - {row['last']}" for _, row in df.iterrows()]
   transactions = sample['trans_num'] + ' - ' + sample['last']
+
   selected_transaction_option = st.selectbox('Select a transaction', transactions)
 
   if selected_transaction_option:
@@ -402,7 +409,7 @@ with tab2:
     customer_long = selected_transaction[0]['lon']
 
     selected_city_pop = selected_transaction[0]['city_pop']
-    selected_merchant = selected_transaction[0]['merchant']
+    selected_merchant = selected_transaction[0]['merchant'].split('fraud_')[1]
     selected_merchant_lat = selected_transaction[0]['merch_lat']
     selected_merchant_long = selected_transaction[0]['merch_long']
     selected_category = selected_transaction[0]['category']
@@ -444,6 +451,10 @@ with tab2:
           {customer_job}
         ''')
 
+    col3, col4 = st.columns(2)
+
+    with col3:
+
       amount = st.number_input(
         "Transaction amount",
         min_value = 0.0,
@@ -453,21 +464,30 @@ with tab2:
       genders = ['Male', 'Female']
       gender = st.radio(
         'Gender', genders,
-        index=0 if customer_gender=='Male' else 1)
+        index=0 if customer_gender=='Male' else 1
+      )
 
       age = st.number_input(
-        'Age',
+        "Age",
         min_value=18,
         max_value=100,
         value=customer_age
       )
-
-
-  #     locations = ['Spain', 'France', 'Germany']
       
-  #     location = st.selectbox(
-  #       "Location", locations,
-  #       index=locations.index(customer_location))
+      state = st.selectbox(
+        "State", states,
+        index=states.index(customer_state)
+      )
+
+      merchant = st.selectbox(
+        "Merchant", merchants,
+        index=merchants.index(selected_merchant)
+      )
+
+      job = st.selectbox(
+        "Merchant", jobs,
+        index=jobs.index(customer_job)
+      )
 
 
       
@@ -475,9 +495,3 @@ with tab2:
 
 
 
-  #     tenure = st.number_input(
-  #       'Tenure (years)',
-  #       min_value=0,
-  #       max_value=50,
-  #       value=customer_tenure
-  #     )
