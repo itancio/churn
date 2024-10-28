@@ -230,112 +230,117 @@ def generate_email(probability, input_dict, explanation, surname):
   
   return raw_response.choices[0].message.content
 
+tab1, tab2 = st.tabs([
+  "Customer Churn Prediction",
+  "Fraud Detection Predictions"
+])
 
-st.title("Customer Churn Prediction")
+with tab1:
+  st.title("Customer Churn Prediction")
 
-df = pd.read_csv("churn.csv")
+  df = pd.read_csv("churn.csv")
 
-customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
+  customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
 
-selected_customer_option = st.selectbox('Select a customer', customers)
+  selected_customer_option = st.selectbox('Select a customer', customers)
 
-if selected_customer_option:
-  selected_customer_id = int(selected_customer_option.split(" - ")[0])
-  selected_surname = selected_customer_option.split(" - ")[1]
-  selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
-    orient='records')
+  if selected_customer_option:
+    selected_customer_id = int(selected_customer_option.split(" - ")[0])
+    selected_surname = selected_customer_option.split(" - ")[1]
+    selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
+      orient='records')
 
-  customer_surname = selected_customer[0]['Surname']
-  customer_credit_score = selected_customer[0]['CreditScore']
-  customer_location = selected_customer[0]['Geography']
-  customer_gender = selected_customer[0]['Gender']
-  customer_age = selected_customer[0]['Age']
-  customer_tenure = selected_customer[0]['Tenure']
+    customer_surname = selected_customer[0]['Surname']
+    customer_credit_score = selected_customer[0]['CreditScore']
+    customer_location = selected_customer[0]['Geography']
+    customer_gender = selected_customer[0]['Gender']
+    customer_age = selected_customer[0]['Age']
+    customer_tenure = selected_customer[0]['Tenure']
 
-  customer_balance = selected_customer[0]['Balance']
-  customer_num_products = selected_customer[0]['NumOfProducts']
-  customer_has_credit_card = selected_customer[0]['HasCrCard']
-  customer_is_active_member = selected_customer[0]['IsActiveMember']
-  customer_estimated_salary = selected_customer[0]['EstimatedSalary']
+    customer_balance = selected_customer[0]['Balance']
+    customer_num_products = selected_customer[0]['NumOfProducts']
+    customer_has_credit_card = selected_customer[0]['HasCrCard']
+    customer_is_active_member = selected_customer[0]['IsActiveMember']
+    customer_estimated_salary = selected_customer[0]['EstimatedSalary']
 
-  col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-  with col1:
-    credit_score = st.number_input(
-      "Credit Score",
-      min_value=300,
-      max_value=850,
-      value=customer_credit_score)
+    with col1:
+      credit_score = st.number_input(
+        "Credit Score",
+        min_value=300,
+        max_value=850,
+        value=customer_credit_score)
 
-    locations = ['Spain', 'France', 'Germany']
+      locations = ['Spain', 'France', 'Germany']
+      
+      location = st.selectbox(
+        "Location", locations,
+        index=locations.index(customer_location))
+
+      genders = ['Male', 'Female']
+      
+      gender = st.radio('Gender', genders,
+                      index=0 if customer_gender=='Male' else 1)
+
+      age = st.number_input(
+        'Age',
+        min_value=18,
+        max_value=100,
+        value=customer_age
+      )
+
+      tenure = st.number_input(
+        'Tenure (years)',
+        min_value=0,
+        max_value=50,
+        value=customer_tenure
+      )
+
+    with col2:
+      balance = st.number_input(
+        "Balance",
+        min_value=0.0,
+        value=customer_balance
+      )
     
-    location = st.selectbox(
-      "Location", locations,
-      index=locations.index(customer_location))
-
-    genders = ['Male', 'Female']
+      estimated_salary = st.number_input(
+        'Estimated Salary',
+        min_value=0.0,
+        value=customer_estimated_salary
+      )
+      
+      num_products = st.number_input(
+        "Number of products",
+        min_value=0,
+        max_value=10,
+        value=customer_num_products
+      )
     
-    gender = st.radio('Gender', genders,
-                     index=0 if customer_gender=='Male' else 1)
+      has_credit_card = st.checkbox(
+        'Has Credit Card',
+        value=customer_has_credit_card
+      )
+      
+      is_active_member = st.checkbox(
+        "Is Active Member",
+        value=customer_is_active_member
+      )
 
-    age = st.number_input(
-      'Age',
-      min_value=18,
-      max_value=100,
-      value=customer_age
-    )
+      
 
-    tenure = st.number_input(
-      'Tenure (years)',
-      min_value=0,
-      max_value=50,
-      value=customer_tenure
-    )
+    input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
+    print(input_df)
 
-  with col2:
-    balance = st.number_input(
-      "Balance",
-      min_value=0.0,
-      value=customer_balance
-    )
-  
-    estimated_salary = st.number_input(
-      'Estimated Salary',
-      min_value=0.0,
-      value=customer_estimated_salary
-    )
-    
-    num_products = st.number_input(
-      "Number of products",
-      min_value=0,
-      max_value=10,
-      value=customer_num_products
-    )
-  
-    has_credit_card = st.checkbox(
-      'Has Credit Card',
-      value=customer_has_credit_card
-    )
-    
-    is_active_member = st.checkbox(
-      "Is Active Member",
-      value=customer_is_active_member
-    )
+    avg_probability = make_predictions(input_df, input_dict)
+    print(avg_probability)
 
-    
+    st.markdown('---')
+    st.subheader('Explanation of Prediction')
+    explanation = explain_prediction(avg_probability, input_dict, customer_surname)
+    st.markdown(explanation)
 
-  input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
-  print(input_df)
-
-  avg_probability = make_predictions(input_df, input_dict)
-  print(avg_probability)
-
-  st.markdown('---')
-  st.subheader('Explanation of Prediction')
-  explanation = explain_prediction(avg_probability, input_dict, customer_surname)
-  st.markdown(explanation)
-
-  st.markdown('---')
-  st.subheader('Personalized Email')
-  email = generate_email(avg_probability, input_dict, explanation, customer_surname)
-  st.markdown(email)
+    st.markdown('---')
+    st.subheader('Personalized Email')
+    email = generate_email(avg_probability, input_dict, explanation, customer_surname)
+    st.markdown(email)
