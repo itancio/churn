@@ -52,7 +52,7 @@ source venv/bin/activate
 
 ## Running streamlit
 ```bash
-cd streamlit/
+cd streamlit
 streamlit run main.py
 ```
 

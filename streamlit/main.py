@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import os
 import pickle
 import utils as ut
 import sklearn as sk
@@ -238,109 +237,169 @@ tab1, tab2 = st.tabs([
 with tab1:
   st.title("Customer Churn Prediction")
 
-  df = pd.read_csv("churn.csv")
+  # Load dataset
+  # path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/streamlit/churn.csv"
+  # df = pd.read_csv(path)
 
-  customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
+  # customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
 
-  selected_customer_option = st.selectbox('Select a customer', customers)
+  # selected_customer_option = st.selectbox('Select a customer', customers)
 
-  if selected_customer_option:
-    selected_customer_id = int(selected_customer_option.split(" - ")[0])
-    selected_surname = selected_customer_option.split(" - ")[1]
-    selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
+  # if selected_customer_option:
+  #   selected_customer_id = int(selected_customer_option.split(" - ")[0])
+  #   selected_surname = selected_customer_option.split(" - ")[1]
+  #   selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
+  #     orient='records')
+
+  #   customer_surname = selected_customer[0]['Surname']
+  #   customer_credit_score = selected_customer[0]['CreditScore']
+  #   customer_location = selected_customer[0]['Geography']
+  #   customer_gender = selected_customer[0]['Gender']
+  #   customer_age = selected_customer[0]['Age']
+  #   customer_tenure = selected_customer[0]['Tenure']
+
+  #   customer_balance = selected_customer[0]['Balance']
+  #   customer_num_products = selected_customer[0]['NumOfProducts']
+  #   customer_has_credit_card = selected_customer[0]['HasCrCard']
+  #   customer_is_active_member = selected_customer[0]['IsActiveMember']
+  #   customer_estimated_salary = selected_customer[0]['EstimatedSalary']
+
+  #   col1, col2 = st.columns(2)
+
+  #   with col1:
+  #     credit_score = st.number_input(
+  #       "Credit Score",
+  #       min_value=300,
+  #       max_value=850,
+  #       value=customer_credit_score)
+
+  #     locations = ['Spain', 'France', 'Germany']
+      
+  #     location = st.selectbox(
+  #       "Location", locations,
+  #       index=locations.index(customer_location))
+
+  #     genders = ['Male', 'Female']
+      
+  #     gender = st.radio('Gender', genders,
+  #                     index=0 if customer_gender=='Male' else 1)
+
+  #     age = st.number_input(
+  #       'Age',
+  #       min_value=18,
+  #       max_value=100,
+  #       value=customer_age
+  #     )
+
+  #     tenure = st.number_input(
+  #       'Tenure (years)',
+  #       min_value=0,
+  #       max_value=50,
+  #       value=customer_tenure
+  #     )
+
+  #   with col2:
+  #     balance = st.number_input(
+  #       "Balance",
+  #       min_value=0.0,
+  #       value=customer_balance
+  #     )
+    
+  #     estimated_salary = st.number_input(
+  #       'Estimated Salary',
+  #       min_value=0.0,
+  #       value=customer_estimated_salary
+  #     )
+      
+  #     num_products = st.number_input(
+  #       "Number of products",
+  #       min_value=0,
+  #       max_value=10,
+  #       value=customer_num_products
+  #     )
+    
+  #     has_credit_card = st.checkbox(
+  #       'Has Credit Card',
+  #       value=customer_has_credit_card
+  #     )
+      
+  #     is_active_member = st.checkbox(
+  #       "Is Active Member",
+  #       value=customer_is_active_member
+  #     )
+
+  #   input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
+  #   print(input_df)
+
+  #   avg_probability = make_predictions(input_df, input_dict)
+  #   print(avg_probability)
+
+  #   st.markdown('---')
+  #   st.subheader('Explanation of Prediction')
+  #   explanation = explain_prediction(avg_probability, input_dict, customer_surname)
+  #   st.markdown(explanation)
+
+  #   st.markdown('---')
+  #   st.subheader('Personalized Email')
+  #   email = generate_email(avg_probability, input_dict, explanation, customer_surname)
+  #   st.markdown(email)
+
+with tab2:
+  st.title("Fraud Detection Predictions")
+
+  # Load dataset
+  path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/fraudTrain.csv"
+  df = pd.read_csv(path, index_col=0)
+
+  sample = pd.DataFrame({
+    'cc_num' : 2703186189652095,
+    'merchant' : 'fraud_Rippin, Kub and Mann',
+    'category' : 'misc_net',
+    'amt' : 4.97,
+    'first' : 'Jennifer',
+    'last' : 'Banks',
+    'gender' : 'F',
+    'street' : '561 Perry Cove',
+    'city' : 'Moravian Falls',
+
+    'trans_num' : '0b242abb623afc578575680df30655b9',
+    'lat' : 36.0788,
+    'long' : -81.1781,
+    'merch_lat' : 36.011293,
+    'merch_long' : -82.048315,
+
+  })
+
+  transactions = [f"{row['trans_num']} - {row['last']}" for _, row in df.iterrows()]
+
+  selected_transaction_option = st.selectbox('Select a transaction', transactions)
+
+  if selected_transaction_option:
+    selected_transaction_id = selected_transaction_option.split(" - ")[0]
+    selected_surname = selected_transaction_option.split(" - ")[1]
+    selected_transaction = df.loc[df['trans_num'] == selected_transaction_id].to_dict(
       orient='records')
+    
+    print(selected_transaction)
 
-    customer_surname = selected_customer[0]['Surname']
-    customer_credit_score = selected_customer[0]['CreditScore']
-    customer_location = selected_customer[0]['Geography']
-    customer_gender = selected_customer[0]['Gender']
-    customer_age = selected_customer[0]['Age']
-    customer_tenure = selected_customer[0]['Tenure']
+    customer_surname = selected_transaction[0]['last']
+    customer_gender = selected_transaction[0]['gender']
+    customer_job = selected_transaction[0]['job']
+    customer_birthdate = selected_transaction[0]['dob']
+    customer_address = selected_transaction[0]['street'] + selected_transaction[0]['city'] + selected_transaction[0]['state'] + str(selected_transaction[0]['zip'])
+    customer_lat = selected_transaction[0]['lat']
+    customer_long = selected_transaction[0]['long']
+    
 
-    customer_balance = selected_customer[0]['Balance']
-    customer_num_products = selected_customer[0]['NumOfProducts']
-    customer_has_credit_card = selected_customer[0]['HasCrCard']
-    customer_is_active_member = selected_customer[0]['IsActiveMember']
-    customer_estimated_salary = selected_customer[0]['EstimatedSalary']
+    selected_city_pop = selected_transaction[0]['city_pop']
+    selected_merchant = selected_transaction[0]['merchant']
+    selected_merchant_lat = selected_transaction[0]['merch_lat']
+    selected_merchant_long = selected_transaction[0]['merch_long']
+    selected_category = selected_transaction[0]['category']
+    selected_amt = selected_transaction[0]['amt']
+
 
     col1, col2 = st.columns(2)
 
     with col1:
-      credit_score = st.number_input(
-        "Credit Score",
-        min_value=300,
-        max_value=850,
-        value=customer_credit_score)
-
-      locations = ['Spain', 'France', 'Germany']
-      
-      location = st.selectbox(
-        "Location", locations,
-        index=locations.index(customer_location))
-
-      genders = ['Male', 'Female']
-      
-      gender = st.radio('Gender', genders,
-                      index=0 if customer_gender=='Male' else 1)
-
-      age = st.number_input(
-        'Age',
-        min_value=18,
-        max_value=100,
-        value=customer_age
-      )
-
-      tenure = st.number_input(
-        'Tenure (years)',
-        min_value=0,
-        max_value=50,
-        value=customer_tenure
-      )
-
-    with col2:
-      balance = st.number_input(
-        "Balance",
-        min_value=0.0,
-        value=customer_balance
-      )
-    
-      estimated_salary = st.number_input(
-        'Estimated Salary',
-        min_value=0.0,
-        value=customer_estimated_salary
-      )
-      
-      num_products = st.number_input(
-        "Number of products",
-        min_value=0,
-        max_value=10,
-        value=customer_num_products
-      )
-    
-      has_credit_card = st.checkbox(
-        'Has Credit Card',
-        value=customer_has_credit_card
-      )
-      
-      is_active_member = st.checkbox(
-        "Is Active Member",
-        value=customer_is_active_member
-      )
-
-      
-
-    input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
-    print(input_df)
-
-    avg_probability = make_predictions(input_df, input_dict)
-    print(avg_probability)
-
-    st.markdown('---')
-    st.subheader('Explanation of Prediction')
-    explanation = explain_prediction(avg_probability, input_dict, customer_surname)
-    st.markdown(explanation)
-
-    st.markdown('---')
-    st.subheader('Personalized Email')
-    email = generate_email(avg_probability, input_dict, explanation, customer_surname)
-    st.markdown(email)
+      st.map([customer_lat, customer_long])
