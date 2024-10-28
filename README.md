@@ -34,6 +34,15 @@ Skills: Python, OpenAI, Machine Learning, Model Inference, Feature Engineering, 
 
 
 # Developer's Notes
+## Add the git repo:
+git init
+git add *
+git commit -m 'Initial commit'
+git branch -M main
+git remote add orgin https://github.com/itancio/<repot>.git
+git push -u origin main
+
+
 ## Create Python virtual environment
 ```bash
 python3 -m venv venv
@@ -46,7 +55,7 @@ cd streamlit/
 streamlit run main.py
 ```
 
-Troubleshooting:
+# Troubleshooting:
 * ERROR: The error was related to XGBoost failing to load due to the missing OpenMP runtime library (libomp.dylib) on macOS
 
 SOLUTION: Update ```libomp```
