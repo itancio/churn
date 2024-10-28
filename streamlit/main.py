@@ -358,7 +358,8 @@ with tab2:
     'trans_date_trans_time': '2019-01-01 00:00:18', 
     'cc_num': 2703186189652095, 
     'merchant': 'fraud_Rippin, Kub and Mann', 
-    'category': 'misc_net', 'amt': 4.97, 
+    'category': 'misc_net', 
+    'amt': 4.97, 
     'first': 'Jennifer', 
     'last': 'Banks', 
     'gender': 'F', 
@@ -388,11 +389,15 @@ with tab2:
     selected_surname = selected_transaction_option.split(" - ")[1]
     selected_transaction = df.loc[df['trans_num'] == selected_transaction_id].to_dict(orient='records')
 
-    customer_surname = selected_transaction[0]['last']
+    customer_first = selected_transaction[0]['first']
+    customer_last = selected_transaction[0]['last']
     customer_gender = selected_transaction[0]['gender']
     customer_job = selected_transaction[0]['job']
     customer_birthdate = selected_transaction[0]['dob']
-    customer_address = selected_transaction[0]['street'] + selected_transaction[0]['city'] + selected_transaction[0]['state'] + str(selected_transaction[0]['zip'])
+    customer_street = selected_transaction[0]['street']
+    customer_city = selected_transaction[0]['city']
+    customer_state = selected_transaction[0]['state']
+    customer_zip = str(selected_transaction[0]['zip'])
     customer_lat = selected_transaction[0]['lat']
     customer_long = selected_transaction[0]['lon']
 
@@ -403,8 +408,76 @@ with tab2:
     selected_category = selected_transaction[0]['category']
     selected_amt = selected_transaction[0]['amt']
 
+    # Preprocess Age Feature
+    selected_trans_date = selected_transaction[0]['trans_date_trans_time']
+    customer_dob = selected_transaction[0]['dob'] 
+
+    selected_trans_date = pd.to_datetime(selected_trans_date)
+    customer_dob = pd.to_datetime(customer_dob)
+
+    selected_trans_year = selected_trans_date.year
+    customer_dob_year = customer_dob.year
+
+    customer_age = selected_trans_year - customer_dob_year
+    print(customer_age)
+
+
 
     col1, col2 = st.columns(2)
 
     with col1:
       st.map(selected_transaction, latitude=customer_lat, longitude=customer_long, color="#0044ff", zoom=6,)
+
+    with col2:
+      col2a, col2b, _ = st.columns(3)
+      with col2a:
+        st.markdown(f'''
+          :green[Name:] \n
+          :green[Address:] \n
+          \n\n
+          :green[Job] \n
+        ''')
+      with col2b:
+        st.markdown(f'''
+          {customer_first} {customer_last} \n
+          {customer_street}, {customer_city}, {customer_state}, {customer_zip} \n
+          {customer_job}
+        ''')
+
+      amount = st.number_input(
+        "Transaction amount",
+        min_value = 0.0,
+        value = selected_amt
+      )
+
+      genders = ['Male', 'Female']
+      gender = st.radio(
+        'Gender', genders,
+        index=0 if customer_gender=='Male' else 1)
+
+      age = st.number_input(
+        'Age',
+        min_value=18,
+        max_value=100,
+        value=customer_age
+      )
+
+
+  #     locations = ['Spain', 'France', 'Germany']
+      
+  #     location = st.selectbox(
+  #       "Location", locations,
+  #       index=locations.index(customer_location))
+
+
+      
+
+
+
+
+  #     tenure = st.number_input(
+  #       'Tenure (years)',
+  #       min_value=0,
+  #       max_value=50,
+  #       value=customer_tenure
+  #     )
