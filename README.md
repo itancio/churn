@@ -35,13 +35,14 @@ Skills: Python, OpenAI, Machine Learning, Model Inference, Feature Engineering, 
 
 # Developer's Notes
 ## Add the git repo:
+```bash
 git init
 git add *
 git commit -m 'Initial commit'
 git branch -M main
 git remote add orgin https://github.com/itancio/<repot>.git
 git push -u origin main
-
+```
 
 ## Create Python virtual environment
 ```bash
