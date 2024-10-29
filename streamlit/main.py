@@ -357,15 +357,12 @@ random_forest_model = load_model('models_fraud/RandomForestClassifier.pkl')
 decision_tree_model = load_model('models_fraud/DecisionTreeClassifier.pkl')
 
 
-def prepare_input(gender, age, state, job, merchant, category, amount):
+def prepare_fraud_input(category, amount, age, gender, state, median_price):
   input_dict = {
-    'Gender': gender,
-    'Age': age,
-    'State': state,
-    'Job': job,
-    'Merchant': merchant,
-    'Category': category,
     'Amount' : amount,
+    'Age' : age,
+    'Price_Ratio' : amount / median_price,
+
   }
 
   input_df = pd.DataFrame([input_dict])
@@ -387,8 +384,8 @@ def make_fraud_predictions(input_df, input_dict):
   input_df = input_df[expected_order]
 
   # Convert categorical columns to the 'category' dtype
-  categorical_cols = ['Gender', 'State', 'Job', 'Merchant', 'Category']
-  input_df[categorical_cols] = input_df[categorical_cols].astype('category')
+  categorical_cols = ['State', 'Category']
+  input_df['Category'] = input_df[categorical_cols].astype('category')
   print("input shape: ", input_df.shape)
 
 
@@ -485,6 +482,9 @@ with tab2:
   jobs = sorted(list(df['job'].unique()))
   merchants = sorted(list(merch.split('fraud_')[1] for merch in df['merchant'].unique()))
   categories = sorted(list(df['category'].unique()))
+  median_price = df['amt'].median()
+
+  print('States: ', states)
 
   transactions = [f"{row['last']}, {row['first']} - {row['trans_num']}" for _, row in df.iterrows()]
   selected_transaction_option = st.selectbox('Select a transaction', transactions)
@@ -563,10 +563,10 @@ with tab2:
       col3, col4 = st.columns(2)
 
       with col3:
-        genders = ['Male', 'Female']
+        genders = ['Female', 'Male']
         gender = st.radio(
           'Gender', genders,
-          index=0 if customer_gender=='Male' else 1
+          index=1 if customer_gender=='Male' else 0
         )
 
         age = st.number_input(
@@ -581,17 +581,7 @@ with tab2:
           index=states.index(customer_state)
         )
 
-        job = st.selectbox(
-          "Job", jobs,
-          index=jobs.index(customer_job)
-        )
-
       with col4:
-        merchant = st.selectbox(
-          "Merchant", merchants,
-          index=merchants.index(selected_merchant)
-        )
-
         category = st.selectbox(
           "Category", categories,
           index=categories.index(selected_category)
@@ -603,7 +593,7 @@ with tab2:
           value = selected_amt
         )
     
-    input_df, input_dict = prepare_input(gender, age, state, job, merchant, category, amount)
+    input_df, input_dict = prepare_fraud_input(category, amount, age, gender, state, median_price)
     print(input_df)
 
     avg_probability = make_fraud_predictions(input_df, input_dict)
