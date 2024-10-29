@@ -4,6 +4,7 @@ import numpy as np
 import pickle
 import utils as ut
 import sklearn as sk
+import xgboost as xgb
 
 from openai import OpenAI
 
@@ -20,22 +21,22 @@ def load_model(filename):
     return pickle.load(file)
 
 # Trained models
-# xgboost_model = load_model('XGBClassifier.pkl')
-# naive_bayes_model = load_model('GaussianNB.pkl')
-# random_forest_model = load_model('RandomForestClassifier.pkl')
-# decision_tree_model = load_model('DecisionTreeClassifier.pkl')
-# svm_model = load_model( 'SVC.pkl')
-# knn_model = load_model('KNeighborsClassifier.pkl')
+# xgboost_model = load_model('models_churn/XGBClassifier.pkl')
+# naive_bayes_model = load_model('models_churn/GaussianNB.pkl')
+# random_forest_model = load_model('models_churn/RandomForestClassifier.pkl')
+# decision_tree_model = load_model('models_churn/DecisionTreeClassifier.pkl')
+# svm_model = load_model( 'models_churn/SVC.pkl')
+# knn_model = load_model('models_churn/KNeighborsClassifier.pkl')
 
 # Train models with feature engineering
-voting_classifier_model = load_model('VotingClassifier-voting.pkl')
-xgboost_SMOTE_model = load_model('XGBClassifier-SMOTE.pkl')
-xgboost_featureEngineered_model = load_model('XGBClassifier-featureEngineer.pkl')
-naive_bayes_model = load_model('GaussianNB-engineered.pkl')
-random_forest_model = load_model('RandomForestClassifier-engineered.pkl')
-decision_tree_model = load_model('DecisionTreeClassifier-engineered.pkl')
-svm_model = load_model( 'SVC-engineered.pkl')
-knn_model = load_model('KNeighborsClassifier-engineered.pkl')
+voting_classifier_model = load_model('models_churn/VotingClassifier-voting.pkl')
+xgboost_SMOTE_model = load_model('models_churn/XGBClassifier-SMOTE.pkl')
+xgboost_featureEngineered_model = load_model('models_churn/XGBClassifier-featureEngineer.pkl')
+naive_bayes_model = load_model('models_churn/GaussianNB-engineered.pkl')
+random_forest_model = load_model('models_churn/RandomForestClassifier-engineered.pkl')
+decision_tree_model = load_model('models_churn/DecisionTreeClassifier-engineered.pkl')
+svm_model = load_model( 'models_churn/SVC-engineered.pkl')
+knn_model = load_model('models_churn/KNeighborsClassifier-engineered.pkl')
 
 def prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary):
   input_dict = {
@@ -344,56 +345,152 @@ with tab1:
   #   email = generate_email(avg_probability, input_dict, explanation, customer_surname)
   #   st.markdown(email)
 
+
+
+
+################################################################################################################################
+
+# Load models
+xgboost_model = load_model('models_fraud/XGBClassifier.pkl')
+naive_bayes_model = load_model('models_fraud/GaussianNB.pkl')
+random_forest_model = load_model('models_fraud/RandomForestClassifier.pkl')
+decision_tree_model = load_model('models_fraud/DecisionTreeClassifier.pkl')
+
+
+def prepare_input(gender, age, state, job, merchant, category, amount):
+  input_dict = {
+    'Gender': gender,
+    'Age': age,
+    'State': state,
+    'Job': job,
+    'Merchant': merchant,
+    'Category': category,
+    'Amount' : amount,
+  }
+
+  input_df = pd.DataFrame([input_dict])
+  return input_df, input_dict
+
+def make_fraud_predictions(input_df, input_dict):
+  # Define the expected order of features for XGBoost
+  expected_order = [
+    'Gender',
+    'Age',
+    'State',
+    'Job',
+    'Merchant',
+    'Category',
+    'Amount',
+  ] 
+  
+  # Reorder the input DataFrame
+  input_df = input_df[expected_order]
+
+  # Convert categorical columns to the 'category' dtype
+  categorical_cols = ['Gender', 'State', 'Job', 'Merchant', 'Category']
+  input_df[categorical_cols] = input_df[categorical_cols].astype('category')
+  print("input shape: ", input_df.shape)
+
+
+  # Make predictions
+  xgb_predict = xgboost_model.predict_proba(input_df)[0][1],
+  nb_predict = naive_bayes_model.predict_proba(input_df)[0][1],
+  rf_predict = random_forest_model.predict_proba(input_df)[0][1],
+  dt_predict = decision_tree_model.predict_proba(input_df)[0][1],
+
+  xgb_predict = xgb_predict[0]
+  nb_predict = nb_predict[0]
+  rf_predict = rf_predict[0]
+  dt_predict = dt_predict[0]
+
+  probabilities = {}
+
+  # Filter out predictions that are very close to zero
+  min_threshold = 0.0001
+  if xgb_predict >= min_threshold: probabilities['XGBoost'] = xgb_predict
+  if nb_predict >= min_threshold: probabilities['Naive Bayes'] = nb_predict
+  if rf_predict >= min_threshold: probabilities['Random Forest'] = rf_predict
+  if dt_predict >= min_threshold: probabilities['Decision Tree'] = dt_predict
+  
+  print(probabilities)
+
+  # Calculate the average probability
+  avg_probability = np.mean(list(probabilities.values()))
+  print('avg_probability: ', avg_probability)
+
+  col1, col2 = st.columns(2)
+
+  with col1:
+    fig = ut.create_gauge_chart(avg_probability)
+    st.plotly_chart(fig, use_container_width=True)
+    st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
+
+    st.markdown("### Model Probabilities")
+    col1_1, col1_2 = st.columns(2)
+    for model, prob in probabilities.items():
+      col1_1.write(f"{model}: ")
+      col1_2.write(f"{prob * 100:.2f}%")
+
+  with col2:
+    fig_probs = ut.create_model_probability_chart(probabilities)
+    st.plotly_chart(fig_probs, use_container_width=True)
+
+  st.markdown(f"### Average Probability: {avg_probability * 100:.2f}%")
+
+  return avg_probability
+
+
+
+
+
+# Load dataset
+path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/fraudTrain.csv"
+df = pd.read_csv(path, index_col=0)
+
+# Needed for the map
+df = df.rename(columns={'long' : 'lon'})
+
 with tab2:
   st.title("Fraud Detection Predictions")
 
-  # Load dataset
-  # path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/fraudTrain.csv"
-  # df = pd.read_csv(path, index_col=0)
-  
-  # Needed for the map
-  # df = df.rename(columns={'long' : 'lon'})
+  # sample = pd.DataFrame([{
+  #   'trans_date_trans_time': '2019-01-01 00:00:18', 
+  #   'cc_num': 2703186189652095, 
+  #   'merchant': 'fraud_Rippin, Kub and Mann', 
+  #   'category': 'misc_net', 
+  #   'amt': 4.97, 
+  #   'first': 'Jennifer', 
+  #   'last': 'Banks', 
+  #   'gender': 'F', 
+  #   'street': '561 Perry Cove', 
+  #   'city': 'Moravian Falls', 
+  #   'state': 'NC', 
+  #   'zip': 28654, 
+  #   'lat': 36.0788, 
+  #   'lon': -81.1781, 
+  #   'city_pop': 3495, 
+  #   'job': 'Psychologist, counselling', 
+  #   'dob': '1988-03-09', 
+  #   'trans_num': '0b242abb623afc578575680df30655b9', 
+  #   'unix_time': 1325376018, 
+  #   'merch_lat': 36.011293, 
+  #   'merch_long': -82.048315, 
+  #   'is_fraud': 0
+  # }])
 
-  sample = pd.DataFrame([{
-    'trans_date_trans_time': '2019-01-01 00:00:18', 
-    'cc_num': 2703186189652095, 
-    'merchant': 'fraud_Rippin, Kub and Mann', 
-    'category': 'misc_net', 
-    'amt': 4.97, 
-    'first': 'Jennifer', 
-    'last': 'Banks', 
-    'gender': 'F', 
-    'street': '561 Perry Cove', 
-    'city': 'Moravian Falls', 
-    'state': 'NC', 
-    'zip': 28654, 
-    'lat': 36.0788, 
-    'lon': -81.1781, 
-    'city_pop': 3495, 
-    'job': 'Psychologist, counselling', 
-    'dob': '1988-03-09', 
-    'trans_num': '0b242abb623afc578575680df30655b9', 
-    'unix_time': 1325376018, 
-    'merch_lat': 36.011293, 
-    'merch_long': -82.048315, 
-    'is_fraud': 0
-  }])
-  df = sample
+  # transactions = sample['trans_num'] + ' - ' + sample['last']
 
-  states = list(df['state'].unique())
-  jobs = list(df['job'].unique())
-  merchants = list(merch.split('fraud_')[1] for merch in df['merchant'].unique())
-  categories = list(df['category'].unique())
-  print('merchants: ', merchants)
+  # Create lists
+  states = sorted(list(df['state'].unique()))
+  jobs = sorted(list(df['job'].unique()))
+  merchants = sorted(list(merch.split('fraud_')[1] for merch in df['merchant'].unique()))
+  categories = sorted(list(df['category'].unique()))
 
-  # transactions = [f"{row['trans_num']} - {row['last']}" for _, row in df.iterrows()]
-  transactions = sample['trans_num'] + ' - ' + sample['last']
-
+  transactions = [f"{row['last']}, {row['first']} - {row['trans_num']}" for _, row in df.iterrows()]
   selected_transaction_option = st.selectbox('Select a transaction', transactions)
 
   if selected_transaction_option:
-    selected_transaction_id = selected_transaction_option.split(" - ")[0]
-    selected_surname = selected_transaction_option.split(" - ")[1]
+    selected_transaction_id = selected_transaction_option.split(" - ")[1]
     selected_transaction = df.loc[df['trans_num'] == selected_transaction_id].to_dict(orient='records')
 
     customer_first = selected_transaction[0]['first']
@@ -414,6 +511,7 @@ with tab2:
     selected_merchant_long = selected_transaction[0]['merch_long']
     selected_category = selected_transaction[0]['category']
     selected_amt = selected_transaction[0]['amt']
+    selected_is_fraud = selected_transaction[0]['is_fraud']
 
     # Preprocess Age Feature
     selected_trans_date = selected_transaction[0]['trans_date_trans_time']
@@ -426,68 +524,90 @@ with tab2:
     customer_dob_year = customer_dob.year
 
     customer_age = selected_trans_year - customer_dob_year
-    print(customer_age)
 
-
+    st.map(selected_transaction, latitude=customer_lat, longitude=customer_long, color="#0044ff", zoom=7.5,)
 
     col1, col2 = st.columns(2)
 
     with col1:
-      st.map(selected_transaction, latitude=customer_lat, longitude=customer_long, color="#0044ff", zoom=6,)
+      st.markdown(f'''
+        **Customer Details** \n
+        :green[Name:] {customer_first} {customer_last} \n
+        :green[Job:] {customer_job} \n
+        :green[Gender:] {'Male' if customer_gender =='M' else 'Female'} \n
+        :green[Birthdate:] {customer_birthdate} \n
+        :green[Age:] {customer_age} \n
+        :green[Address:] {customer_street}, {customer_city}, {customer_state}, {customer_zip} \n
+        :green[City Population:] ~{selected_city_pop} \n
+      ''')     
 
     with col2:
-      col2a, col2b, _ = st.columns(3)
-      with col2a:
-        st.markdown(f'''
-          :green[Name:] \n
-          :green[Address:] \n
-          \n\n
-          :green[Job] \n
-        ''')
-      with col2b:
-        st.markdown(f'''
-          {customer_first} {customer_last} \n
-          {customer_street}, {customer_city}, {customer_state}, {customer_zip} \n
-          {customer_job}
-        ''')
+      st.markdown(f'''
+        **Transaction Details** \n
+        :green[Transaction ID:] {selected_transaction_id[:-6]} \n
+        :green[Transaction Timestamp:] {selected_trans_date} \n
+        :green[Merchant Name:] {selected_merchant} \n
+        :green[Category: ] {selected_category} \n
+        :green[Amount: ] $ {selected_amt} \n
+      ''')
 
-    col3, col4 = st.columns(2)
+      if selected_is_fraud:
+        st.markdown('**:green[Status:] :red[Detected fraudulent activity]**')
+      else:
+        st.markdown('**:green[Status: Clear]**')
 
-    with col3:
+    st.title("Prediction Parameters")
+    st.markdown("Adjust the parameters to observe changes in probabilities or predictions.")
 
-      amount = st.number_input(
-        "Transaction amount",
-        min_value = 0.0,
-        value = selected_amt
-      )
+    with st.container(border=True):
+      col3, col4 = st.columns(2)
 
-      genders = ['Male', 'Female']
-      gender = st.radio(
-        'Gender', genders,
-        index=0 if customer_gender=='Male' else 1
-      )
+      with col3:
+        genders = ['Male', 'Female']
+        gender = st.radio(
+          'Gender', genders,
+          index=0 if customer_gender=='Male' else 1
+        )
 
-      age = st.number_input(
-        "Age",
-        min_value=18,
-        max_value=100,
-        value=customer_age
-      )
-      
-      state = st.selectbox(
-        "State", states,
-        index=states.index(customer_state)
-      )
+        age = st.number_input(
+          "Age",
+          min_value=18,
+          max_value=100,
+          value=customer_age
+        )
+        
+        state = st.selectbox(
+          "State", states,
+          index=states.index(customer_state)
+        )
 
-      merchant = st.selectbox(
-        "Merchant", merchants,
-        index=merchants.index(selected_merchant)
-      )
+        job = st.selectbox(
+          "Job", jobs,
+          index=jobs.index(customer_job)
+        )
 
-      job = st.selectbox(
-        "Merchant", jobs,
-        index=jobs.index(customer_job)
-      )
+      with col4:
+        merchant = st.selectbox(
+          "Merchant", merchants,
+          index=merchants.index(selected_merchant)
+        )
+
+        category = st.selectbox(
+          "Category", categories,
+          index=categories.index(selected_category)
+        )
+
+        amount = st.number_input(
+          "Transaction amount",
+          min_value = 0.0,
+          value = selected_amt
+        )
+    
+    input_df, input_dict = prepare_input(gender, age, state, job, merchant, category, amount)
+    print(input_df)
+
+    avg_probability = make_fraud_predictions(input_df, input_dict)
+    print(avg_probability)
 
 
       
