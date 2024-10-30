@@ -441,8 +441,8 @@ def make_fraud_predictions(input_df, input_dict):
 
 
 # Load dataset
-path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/fraudTrain.csv"
-df = pd.read_csv(path, index_col=0)
+path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/modified_df.csv"
+df = pd.read_csv(path)
 
 # Needed for the map
 df = df.rename(columns={'long' : 'lon'})
@@ -472,19 +472,108 @@ with tab2:
   #   'unix_time': 1325376018, 
   #   'merch_lat': 36.011293, 
   #   'merch_long': -82.048315, 
-  #   'is_fraud': 0
+  #   'is_fraud': 0,
+  #   'trans_year' : 2019, 
+  #   'dob_year' : 1978, 
+  #   'age' : 31, 
+  #   'ageGroup' : 'Early',
+  #   'price_ratio_to_median': 4.97 / 4.97, 
+  #   'category_codes': 8, 
+  #   'state_codes': 27, 
+  #   'ageGroup_codes': 0, 
+  #   'gender_codes': 0
   # }])
 
   # transactions = sample['trans_num'] + ' - ' + sample['last']
 
+  mappings = {
+    'ageGroup': {
+      0: 'Early', 
+      1: 'MiddleAge', 
+      2: 'Senior', 
+      3: 'Elderly'},
+    'category': {
+      0: 'entertainment',
+      1: 'food_dining',
+      2: 'gas_transport',
+      3: 'grocery_net',
+      4: 'grocery_pos',
+      5: 'health_fitness',
+      6: 'home',
+      7: 'kids_pets',
+      8: 'misc_net',
+      9: 'misc_pos',
+      10: 'personal_care',
+      11: 'shopping_net',
+      12: 'shopping_pos',
+      13: 'travel'},
+    'gender': {
+      0: 'F', 
+      1: 'M'},
+    'state': {
+      0: 'AK',
+      1: 'AL',
+      2: 'AR',
+      3: 'AZ',
+      4: 'CA',
+      5: 'CO',
+      6: 'CT',
+      7: 'DC',
+      8: 'DE',
+      9: 'FL',
+      10: 'GA',
+      11: 'HI',
+      12: 'IA',
+      13: 'ID',
+      14: 'IL',
+      15: 'IN',
+      16: 'KS',
+      17: 'KY',
+      18: 'LA',
+      19: 'MA',
+      20: 'MD',
+      21: 'ME',
+      22: 'MI',
+      23: 'MN',
+      24: 'MO',
+      25: 'MS',
+      26: 'MT',
+      27: 'NC',
+      28: 'ND',
+      29: 'NE',
+      30: 'NH',
+      31: 'NJ',
+      32: 'NM',
+      33: 'NV',
+      34: 'NY',
+      35: 'OH',
+      36: 'OK',
+      37: 'OR',
+      38: 'PA',
+      39: 'RI',
+      40: 'SC',
+      41: 'SD',
+      42: 'TN',
+      43: 'TX',
+      44: 'UT',
+      45: 'VA',
+      46: 'VT',
+      47: 'WA',
+      48: 'WI',
+      49: 'WV',
+      50: 'WY'}
+    }
+
   # Create lists
-  states = sorted(list(df['state'].unique()))
   jobs = sorted(list(df['job'].unique()))
   merchants = sorted(list(merch.split('fraud_')[1] for merch in df['merchant'].unique()))
-  categories = sorted(list(df['category'].unique()))
+  categories = [f'{k} - {v}' for k, v in mappings['category'].items()]
+  ageGroups = [f'{k} - {v}' for k, v in mappings['ageGroup'].items()]
+  genders = [f'{k} - {v}' for k, v in mappings['gender'].items()]
+  states = [f'{k} - {v}' for k, v in mappings['state'].items()]
+
   median_price = df['amt'].median()
 
-  print('States: ', states)
 
   transactions = [f"{row['last']}, {row['first']} - {row['trans_num']}" for _, row in df.iterrows()]
   selected_transaction_option = st.selectbox('Select a transaction', transactions)
@@ -497,10 +586,11 @@ with tab2:
     customer_last = selected_transaction[0]['last']
     customer_gender = selected_transaction[0]['gender']
     customer_job = selected_transaction[0]['job']
+    customer_age = selected_transaction[0]['age']
     customer_birthdate = selected_transaction[0]['dob']
     customer_street = selected_transaction[0]['street']
     customer_city = selected_transaction[0]['city']
-    customer_state = selected_transaction[0]['state']
+    customer_state = f"{selected_transaction[0]['state_codes']} - {selected_transaction[0]['state']}"
     customer_zip = str(selected_transaction[0]['zip'])
     customer_lat = selected_transaction[0]['lat']
     customer_long = selected_transaction[0]['lon']
@@ -509,21 +599,11 @@ with tab2:
     selected_merchant = selected_transaction[0]['merchant'].split('fraud_')[1]
     selected_merchant_lat = selected_transaction[0]['merch_lat']
     selected_merchant_long = selected_transaction[0]['merch_long']
-    selected_category = selected_transaction[0]['category']
+    selected_trans_date = selected_transaction[0]['trans_date_trans_time']
+    selected_category = f"{selected_transaction[0]['category_codes']} - {selected_transaction[0]['category']}"
     selected_amt = selected_transaction[0]['amt']
     selected_is_fraud = selected_transaction[0]['is_fraud']
 
-    # Preprocess Age Feature
-    selected_trans_date = selected_transaction[0]['trans_date_trans_time']
-    customer_dob = selected_transaction[0]['dob'] 
-
-    selected_trans_date = pd.to_datetime(selected_trans_date)
-    customer_dob = pd.to_datetime(customer_dob)
-
-    selected_trans_year = selected_trans_date.year
-    customer_dob_year = customer_dob.year
-
-    customer_age = selected_trans_year - customer_dob_year
 
     st.map(selected_transaction, latitude=customer_lat, longitude=customer_long, color="#0044ff", zoom=7.5,)
 
@@ -563,10 +643,9 @@ with tab2:
       col3, col4 = st.columns(2)
 
       with col3:
-        genders = ['Female', 'Male']
         gender = st.radio(
           'Gender', genders,
-          index=1 if customer_gender=='Male' else 0
+          index=1 if customer_gender=='1 - Male' else 0
         )
 
         age = st.number_input(
@@ -592,12 +671,14 @@ with tab2:
           min_value = 0.0,
           value = selected_amt
         )
+
+    print('selected: ', gender, age, state, category, amount)
     
     input_df, input_dict = prepare_fraud_input(category, amount, age, gender, state, median_price)
     print(input_df)
 
-    avg_probability = make_fraud_predictions(input_df, input_dict)
-    print(avg_probability)
+    # avg_probability = make_fraud_predictions(input_df, input_dict)
+    # print(avg_probability)
 
 
       
