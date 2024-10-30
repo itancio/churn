@@ -1,10 +1,10 @@
 import plotly.graph_objects as go
 
-def create_gauge_chart(probability):
+def create_gauge_chart(probability, prefix='Churn'):
     # Determine color based on churn probability
-    if probability < 0.3:
+    if probability < 0.33:
         color = "green"
-    elif probability < 0.6:
+    elif probability < 0.66:
         color = "yellow"
     else:
         color = "red"
@@ -19,7 +19,7 @@ def create_gauge_chart(probability):
                 "y": [0, 1]
             },
             title={
-                "text": "Churn Probability",
+                "text": prefix + " Probability",
                 "font": {
                     "size": 24,
                     "color": "white"
@@ -44,9 +44,9 @@ def create_gauge_chart(probability):
                 "borderwidth": 2,
                 "bordercolor": "white",
                 "steps": [
-                    {"range": [0, 30], "color": "rgba(0, 255, 0, 0.3)"},
-                    {"range": [30, 60], "color": "rgba(255, 255, 0, 0.3)"},
-                    {"range": [60, 100], "color": "rgba(255, 0, 0, 0.3)"}
+                    {"range": [0, 33], "color": "rgba(0, 255, 0, 0.3)"},
+                    {"range": [33, 66], "color": "rgba(255, 255, 0, 0.3)"},
+                    {"range": [66, 100], "color": "rgba(255, 0, 0, 0.3)"}
                 ],
                 "threshold": {
                     "line": {

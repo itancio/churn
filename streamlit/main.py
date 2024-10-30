@@ -412,7 +412,7 @@ def make_fraud_predictions(input_df, input_dict):
   col1, col2 = st.columns(2)
 
   with col1:
-    fig = ut.create_gauge_chart(avg_probability)
+    fig = ut.create_gauge_chart(avg_probability, 'Fraud')
     st.plotly_chart(fig, use_container_width=True)
     st.write(f"The transaction has a {avg_probability:.2%} probability of fraudulence.")
 
@@ -522,16 +522,6 @@ def generate_fraud_email(probability, input_dict, explanation, surname):
   return raw_response.choices[0].message.content
 
 
-
-
-
-# Load dataset
-path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/modified_df.csv"
-df = pd.read_csv(path)
-
-# Needed for the map
-df = df.rename(columns={'long' : 'lon'})
-
 with tab2:
   st.title("Fraud Detection Predictions")
 
@@ -570,6 +560,13 @@ with tab2:
   # }])
 
   # transactions = sample['trans_num'] + ' - ' + sample['last']
+
+  # Load dataset
+  path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/notebook/fraud/modified_df.csv"
+  df = pd.read_csv(path)
+
+  # Needed for the map
+  df = df.rename(columns={'long' : 'lon'})
 
   mappings = {
     'ageGroup': {
