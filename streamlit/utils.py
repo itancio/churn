@@ -72,7 +72,7 @@ def create_gauge_chart(probability):
 
     return fig
 
-def create_model_probability_chart(probabilities):
+def create_model_probability_chart(probabilities, prefix = 'Churn'):
     models = list(probabilities.keys())
     probs = list(probabilities.values())
 
@@ -81,12 +81,12 @@ def create_model_probability_chart(probabilities):
             y=models,
             x=probs,
             orientation="h",
-            text=[f"{p: .2%}" for p in probs],
+            text=[f"{p: .4%}" for p in probs],
             textposition="auto"
         )
     ])
     fig.update_layout(
-        title="Churn Probability by Model",
+        title= prefix + " Probability by Model",
         yaxis_title="Models",
         xaxis_title="Probability",
         xaxis=dict(tickformat=".0%", range=[0, 1]),

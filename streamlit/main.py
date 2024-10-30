@@ -239,111 +239,111 @@ with tab1:
   st.title("Customer Churn Prediction")
 
   # Load dataset
-  # path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/streamlit/churn.csv"
-  # df = pd.read_csv(path)
+  path = "https://media.githubusercontent.com/media/itancio/churn/refs/heads/main/streamlit/churn.csv"
+  df = pd.read_csv(path)
 
-  # customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
+  customers = [f"{row['CustomerId']} - {row['Surname']}" for _, row in df.iterrows()]
 
-  # selected_customer_option = st.selectbox('Select a customer', customers)
+  selected_customer_option = st.selectbox('Select a customer', customers)
 
-  # if selected_customer_option:
-  #   selected_customer_id = int(selected_customer_option.split(" - ")[0])
-  #   selected_surname = selected_customer_option.split(" - ")[1]
-  #   selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
-  #     orient='records')
+  if selected_customer_option:
+    selected_customer_id = int(selected_customer_option.split(" - ")[0])
+    selected_surname = selected_customer_option.split(" - ")[1]
+    selected_customer = df.loc[df['CustomerId'] == selected_customer_id].to_dict(
+      orient='records')
 
-  #   customer_surname = selected_customer[0]['Surname']
-  #   customer_credit_score = selected_customer[0]['CreditScore']
-  #   customer_location = selected_customer[0]['Geography']
-  #   customer_gender = selected_customer[0]['Gender']
-  #   customer_age = selected_customer[0]['Age']
-  #   customer_tenure = selected_customer[0]['Tenure']
+    customer_surname = selected_customer[0]['Surname']
+    customer_credit_score = selected_customer[0]['CreditScore']
+    customer_location = selected_customer[0]['Geography']
+    customer_gender = selected_customer[0]['Gender']
+    customer_age = selected_customer[0]['Age']
+    customer_tenure = selected_customer[0]['Tenure']
 
-  #   customer_balance = selected_customer[0]['Balance']
-  #   customer_num_products = selected_customer[0]['NumOfProducts']
-  #   customer_has_credit_card = selected_customer[0]['HasCrCard']
-  #   customer_is_active_member = selected_customer[0]['IsActiveMember']
-  #   customer_estimated_salary = selected_customer[0]['EstimatedSalary']
+    customer_balance = selected_customer[0]['Balance']
+    customer_num_products = selected_customer[0]['NumOfProducts']
+    customer_has_credit_card = selected_customer[0]['HasCrCard']
+    customer_is_active_member = selected_customer[0]['IsActiveMember']
+    customer_estimated_salary = selected_customer[0]['EstimatedSalary']
 
-  #   col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2)
 
-  #   with col1:
-  #     credit_score = st.number_input(
-  #       "Credit Score",
-  #       min_value=300,
-  #       max_value=850,
-  #       value=customer_credit_score)
+    with col1:
+      credit_score = st.number_input(
+        "Credit Score",
+        min_value=300,
+        max_value=850,
+        value=customer_credit_score)
 
-  #     locations = ['Spain', 'France', 'Germany']
+      locations = ['Spain', 'France', 'Germany']
       
-  #     location = st.selectbox(
-  #       "Location", locations,
-  #       index=locations.index(customer_location))
+      location = st.selectbox(
+        "Location", locations,
+        index=locations.index(customer_location))
 
-  #     genders = ['Male', 'Female']
+      genders = ['Male', 'Female']
       
-  #     gender = st.radio('Gender', genders,
-  #                     index=0 if customer_gender=='Male' else 1)
+      gender = st.radio('Gender', genders,
+                      index=0 if customer_gender=='Male' else 1)
 
-  #     age = st.number_input(
-  #       'Age',
-  #       min_value=18,
-  #       max_value=100,
-  #       value=customer_age
-  #     )
+      age = st.number_input(
+        'Age',
+        min_value=18,
+        max_value=100,
+        value=customer_age
+      )
 
-  #     tenure = st.number_input(
-  #       'Tenure (years)',
-  #       min_value=0,
-  #       max_value=50,
-  #       value=customer_tenure
-  #     )
+      tenure = st.number_input(
+        'Tenure (years)',
+        min_value=0,
+        max_value=50,
+        value=customer_tenure
+      )
 
-  #   with col2:
-  #     balance = st.number_input(
-  #       "Balance",
-  #       min_value=0.0,
-  #       value=customer_balance
-  #     )
+    with col2:
+      balance = st.number_input(
+        "Balance",
+        min_value=0.0,
+        value=customer_balance
+      )
     
-  #     estimated_salary = st.number_input(
-  #       'Estimated Salary',
-  #       min_value=0.0,
-  #       value=customer_estimated_salary
-  #     )
+      estimated_salary = st.number_input(
+        'Estimated Salary',
+        min_value=0.0,
+        value=customer_estimated_salary
+      )
       
-  #     num_products = st.number_input(
-  #       "Number of products",
-  #       min_value=0,
-  #       max_value=10,
-  #       value=customer_num_products
-  #     )
+      num_products = st.number_input(
+        "Number of products",
+        min_value=0,
+        max_value=10,
+        value=customer_num_products
+      )
     
-  #     has_credit_card = st.checkbox(
-  #       'Has Credit Card',
-  #       value=customer_has_credit_card
-  #     )
+      has_credit_card = st.checkbox(
+        'Has Credit Card',
+        value=customer_has_credit_card
+      )
       
-  #     is_active_member = st.checkbox(
-  #       "Is Active Member",
-  #       value=customer_is_active_member
-  #     )
+      is_active_member = st.checkbox(
+        "Is Active Member",
+        value=customer_is_active_member
+      )
 
-  #   input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
-  #   print(input_df)
+    input_df, input_dict = prepare_input(credit_score, location, gender, age, tenure, balance, num_products, has_credit_card, is_active_member, estimated_salary)
+    print(input_df)
 
-  #   avg_probability = make_predictions(input_df, input_dict)
-  #   print(avg_probability)
+    avg_probability = make_predictions(input_df, input_dict)
+    print(avg_probability)
 
-  #   st.markdown('---')
-  #   st.subheader('Explanation of Prediction')
-  #   explanation = explain_prediction(avg_probability, input_dict, customer_surname)
-  #   st.markdown(explanation)
+    st.markdown('---')
+    st.subheader('Explanation of Prediction')
+    explanation = explain_prediction(avg_probability, input_dict, customer_surname)
+    st.markdown(explanation)
 
-  #   st.markdown('---')
-  #   st.subheader('Personalized Email')
-  #   email = generate_email(avg_probability, input_dict, explanation, customer_surname)
-  #   st.markdown(email)
+    st.markdown('---')
+    st.subheader('Personalized Email')
+    email = generate_email(avg_probability, input_dict, explanation, customer_surname)
+    st.markdown(email)
 
 
 
@@ -351,44 +351,37 @@ with tab1:
 ################################################################################################################################
 
 # Load models
-xgboost_model = load_model('models_fraud/XGBClassifier.pkl')
-naive_bayes_model = load_model('models_fraud/GaussianNB.pkl')
-random_forest_model = load_model('models_fraud/RandomForestClassifier.pkl')
-decision_tree_model = load_model('models_fraud/DecisionTreeClassifier.pkl')
+xgboost_model = load_model('models_fraud/XGBClassifier-featured.pkl')
+naive_bayes_model = load_model('models_fraud/GaussianNB-featured.pkl')
+random_forest_model = load_model('models_fraud/RandomForestClassifier-featured.pkl')
+decision_tree_model = load_model('models_fraud/DecisionTreeClassifier-featured.pkl')
 
 
 def prepare_fraud_input(category, amount, age, gender, state, median_price):
-  input_dict = {
-    'Amount' : amount,
-    'Age' : age,
-    'Price_Ratio' : amount / median_price,
+  def group_age(age):
+    if 0 <= age <= 31:
+      return 0
+    elif 32 <= age <= 47:
+      return 1
+    elif 48 <= age <= 75:
+      return 2
+    else:
+      return 3
 
+  input_dict = {
+    'amt' : amount,
+    'age' : age,
+    'price_ratio_to_median' : amount / median_price,
+    'category_codes' : int(category.split(' - ')[0]),
+    'state_codes' : int(state.split(' - ')[0]),
+    'ageGroup_codes' : group_age(age),
+    'gender_codes' : int(gender.split(' - ')[0]),
   }
 
   input_df = pd.DataFrame([input_dict])
   return input_df, input_dict
 
 def make_fraud_predictions(input_df, input_dict):
-  # Define the expected order of features for XGBoost
-  expected_order = [
-    'Gender',
-    'Age',
-    'State',
-    'Job',
-    'Merchant',
-    'Category',
-    'Amount',
-  ] 
-  
-  # Reorder the input DataFrame
-  input_df = input_df[expected_order]
-
-  # Convert categorical columns to the 'category' dtype
-  categorical_cols = ['State', 'Category']
-  input_df['Category'] = input_df[categorical_cols].astype('category')
-  print("input shape: ", input_df.shape)
-
-
   # Make predictions
   xgb_predict = xgboost_model.predict_proba(input_df)[0][1],
   nb_predict = naive_bayes_model.predict_proba(input_df)[0][1],
@@ -399,11 +392,12 @@ def make_fraud_predictions(input_df, input_dict):
   nb_predict = nb_predict[0]
   rf_predict = rf_predict[0]
   dt_predict = dt_predict[0]
+  print(xgb_predict,nb_predict, rf_predict,dt_predict)
 
   probabilities = {}
 
   # Filter out predictions that are very close to zero
-  min_threshold = 0.0001
+  min_threshold = 0.0000001
   if xgb_predict >= min_threshold: probabilities['XGBoost'] = xgb_predict
   if nb_predict >= min_threshold: probabilities['Naive Bayes'] = nb_predict
   if rf_predict >= min_threshold: probabilities['Random Forest'] = rf_predict
@@ -420,21 +414,112 @@ def make_fraud_predictions(input_df, input_dict):
   with col1:
     fig = ut.create_gauge_chart(avg_probability)
     st.plotly_chart(fig, use_container_width=True)
-    st.write(f"The customer has a {avg_probability:.2%} probability of churning.")
+    st.write(f"The transaction has a {avg_probability:.2%} probability of fraudulence.")
 
     st.markdown("### Model Probabilities")
     col1_1, col1_2 = st.columns(2)
     for model, prob in probabilities.items():
       col1_1.write(f"{model}: ")
-      col1_2.write(f"{prob * 100:.2f}%")
+      col1_2.write(f"{prob * 100:.4f}%")
 
   with col2:
-    fig_probs = ut.create_model_probability_chart(probabilities)
+    fig_probs = ut.create_model_probability_chart(probabilities, 'Fraud')
     st.plotly_chart(fig_probs, use_container_width=True)
 
-  st.markdown(f"### Average Probability: {avg_probability * 100:.2f}%")
+  st.markdown(f"### Average Probability: {avg_probability * 100:.4f}%")
 
   return avg_probability
+
+def explain_fraud_prediction(probability, input_dict, surname):
+  systemPrompt = f"""
+  You are an expert data scientist at a bank, wehre you specialize in interpreting
+  and explaining predictions of machine learning models.
+
+  Your machine learning model has predicted that a customer named {surname} has a
+  {probability * 100}% probablity of fraudulence, based on the information provided below.
+
+  Here is the customer's information:
+  {input_dict}
+
+  Here are the machine learning model's top 10 most important features for predicting fraud:
+
+  features	          importance
+  amt	                  0.297064
+  price_ratio_to_median	0.270963
+  category_codes	      0.249900
+  age	                  0.080951
+  state_codes	          0.072448
+  gender_codes	        0.016715
+  ageGroup_codes	      0.011958
+  
+
+  {pd.set_option('display.max_columns', None)}
+
+  Here are the summary statistics for fraud transactions:
+  {df[df['is_fraud'] == 1].describe()}
+
+  Here are summary statistics for non-fraud transactions:
+  {df[df['is_fraud'] == 0].describe()}
+
+  - If the transaction has over a 40% risk of fraud, generate a 3 sentence explanation of
+  why they are at risk of fraud.
+  - If the transaction has less than a 40$ risk of fraud, generate a 3 sentence explanation
+  of why they might not be at risk of fraud.
+  - Your explanation should be based on the transactions's information, the summary statitics
+  of fraud and non-fraud transactions, and the feature importances provided.
+
+  Don't mention the probability of fraud, or the machine learning model,
+  or say anything like "Based on the machine learning model's predictions and top 10 most
+  important features, just explain the prediction.
+
+  """
+
+  print("EXPLANATION PROMPT", systemPrompt)
+
+  raw_response = client.chat.completions.create(
+    model='gpt-4o-mini',
+    messages=[{
+      'role': 'user',
+      'content': systemPrompt
+    }]
+  )
+
+  return raw_response.choices[0].message.content
+
+def generate_fraud_email(probability, input_dict, explanation, surname):
+  systemPrompt = f"""
+  You are a manager at HS Bank, responsible for ensuring the safety and security of customer transactions. 
+
+  You have identified a potential risk with a customer named {surname}, who may be at risk of fraudulent activity or unusual transaction behavior. Here is the customer's information:
+  {input_dict}
+
+  Here is a detailed analysis of the potential risks associated with this customer:
+  {explanation}
+
+  Generate an email to the customer to inform them of potential risks, provide clear advice on how to proceed, and offer reassurance that the bank is actively working to safeguard their account. 
+
+  The email should include:
+  - A polite notification of unusual activity or potential risk.
+  - Clear advice on immediate actions the customer can take to protect their account (e.g., updating passwords, reviewing recent transactions).
+  - Reassurance that HS Bank has implemented measures to mitigate risks, such as monitoring the account more closely or providing additional security options.
+  - Encourage the customer to contact support if they notice any unauthorized transactions.
+
+  Make sure to use reassuring language, maintain a helpful tone, and never disclose the probability of risk detection or the use of a risk model to the customer.
+  Don't ever mention the probability of fraud, or
+  the machine learning model to the customer.
+  """
+
+  raw_response = client.chat.completions. create(
+    model='gpt-4o-mini',
+    messages=[{
+      'role': 'user',
+      'content': systemPrompt
+    }]
+  )
+
+  print("\n\nEMAIL PROMPT", systemPrompt)
+  
+  return raw_response.choices[0].message.content
 
 
 
@@ -674,11 +759,21 @@ with tab2:
 
     print('selected: ', gender, age, state, category, amount)
     
-    input_df, input_dict = prepare_fraud_input(category, amount, age, gender, state, median_price)
+    fraud_input_df, fraud_input_dict = prepare_fraud_input(category, amount, age, gender, state, median_price)
     print(input_df)
 
-    # avg_probability = make_fraud_predictions(input_df, input_dict)
-    # print(avg_probability)
+    fraud_avg_probability = make_fraud_predictions(fraud_input_df, fraud_input_dict)
+    print(fraud_avg_probability)
+
+    st.markdown('---')
+    st.subheader('Explanation of Prediction')
+    explanation = explain_fraud_prediction(fraud_avg_probability, fraud_input_dict, customer_last)
+    st.markdown(explanation)
+
+    st.markdown('---')
+    st.subheader('Personalized Email')
+    email = generate_fraud_email(avg_probability, input_dict, explanation, customer_surname)
+    st.markdown(email)
 
 
       
